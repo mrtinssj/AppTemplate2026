@@ -34,6 +34,9 @@ class DashboardFragment : Fragment() {
     private var imageUri: Uri? = null
 
 
+    private lateinit var nomeEditText: EditText
+    private lateinit var valorEditText: EditText
+    private lateinit var descricaoEditText: EditText
     //TODO("Declare aqui as outras variaveis do tipo EditText que foram inseridas no layout")
     private lateinit var salvarButton: Button
     private lateinit var selectImageButton: Button
@@ -67,6 +70,9 @@ class DashboardFragment : Fragment() {
         salvarButton = view.findViewById(R.id.salvarItemButton)
         selectImageButton = view.findViewById(R.id.button_select_image)
         enderecoEditText = view.findViewById(R.id.enderecoItemEditText)
+        nomeEditText = view.findViewById(R.id.nomeItemEditText)
+        valorEditText = view.findViewById(R.id.valorItemEditText)
+        descricaoEditText = view.findViewById(R.id.descricaoItemEditText)
         //TODO("Capture aqui os outro campos que foram inseridos no layout. Por exemplo, ate
         // o momento so foi capturado o endereco (EditText)")
 
@@ -98,8 +104,11 @@ class DashboardFragment : Fragment() {
     private fun salvarItem() {
         //TODO("Capture aqui o conteudo que esta nos outros editTexts que foram criados")
         val endereco = enderecoEditText.text.toString().trim()
+        val nome = nomeEditText.text.toString().trim()
+        val valor = valorEditText.text.toString().trim()
+        val descricao = descricaoEditText.text.toString().trim()
 
-        if (endereco.isEmpty() || imageUri == null) {
+        if (endereco.isEmpty() || nome.isEmpty() || valor.isEmpty() || descricao.isEmpty() || imageUri == null) {
             Toast.makeText(context, "Por favor, preencha todos os campos", Toast.LENGTH_SHORT)
                 .show()
             return
@@ -117,9 +126,12 @@ class DashboardFragment : Fragment() {
             if (bytes != null) {
                 val base64Image = Base64.encodeToString(bytes, Base64.DEFAULT)
                 val endereco = enderecoEditText.text.toString().trim()
+                val nome = nomeEditText.text.toString().trim()
+                val valor = valorEditText.text.toString().trim()
+                val descricao = descricaoEditText.text.toString().trim()
                 //TODO("Capture aqui o conteudo que esta nos outros editTexts que foram criados")
 
-                val item = Item(endereco, base64Image)
+                val item = Item(endereco, base64Image, nome, valor, descricao)
 
                 saveItemIntoDatabase(item)
             }
@@ -141,7 +153,7 @@ class DashboardFragment : Fragment() {
     private fun saveItemIntoDatabase(item: Item) {
         //TODO("Altere a raiz que sera criada no seu banco de dados do realtime database.
         // Renomeie a raiz itens")
-        databaseReference = FirebaseDatabase.getInstance().getReference("itens")
+        databaseReference = FirebaseDatabase.getInstance().getReference("produto")
 
         // Cria uma chave unica para o novo item
         val itemId = databaseReference.push().key
