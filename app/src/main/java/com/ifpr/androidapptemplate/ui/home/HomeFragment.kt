@@ -16,6 +16,8 @@ import android.graphics.BitmapFactory
 import android.location.Geocoder
 import android.location.Location
 import android.os.Looper
+import android.content.Intent
+import android.net.Uri
 import androidx.core.app.ActivityCompat
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.appcompat.widget.SwitchCompat
@@ -44,6 +46,8 @@ class HomeFragment : Fragment() {
 
     private var _binding: FragmentHomeBinding? = null
 
+    private var currentLatitude: Double = 0.0
+    private var currentLongitude: Double = 0.0
     private lateinit var currentAddressTextView: TextView
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var locationCallback: LocationCallback
@@ -61,8 +65,23 @@ class HomeFragment : Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
+
     ): View {
+
         val view = inflater.inflate(R.layout.fragment_home, container, false)
+
+        val btnGoogleMaps = view.findViewById<Button>(R.id.btnGoogleMaps)
+
+        // BOTÃO GOOGLE MAPS
+        btnGoogleMaps.setOnClickListener {
+
+            val uri = Uri.parse(
+                "https://www.google.com/maps/search/?api=1&query=$currentLatitude,$currentLongitude"
+            )
+
+            val intent = Intent(Intent.ACTION_VIEW, uri)
+            startActivity(intent)
+        }
 
         inicializaGerenciamentoLocalizacao(view)
 
@@ -160,16 +179,29 @@ class HomeFragment : Fragment() {
     }
 
     private fun displayAddress(location: Location) {
+
+        // SALVA A LOCALIZAÇÃO ATUAL
+        currentLatitude = location.latitude
+        currentLongitude = location.longitude
+
         val geocoder = Geocoder(requireContext(), Locale.getDefault())
         val addresses = geocoder.getFromLocation(location.latitude, location.longitude, 1)
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
                 val address = addresses?.firstOrNull()?.getAddressLine(0) ?: "Address not found"
+
                 withContext(Dispatchers.Main) {
+
                     currentAddressTextView.text = address
+
+                    // DEBUG OPCIONAL
+                    println("Latitude: $currentLatitude")
+                    println("Longitude: $currentLongitude")
                 }
+
             } catch (e: Exception) {
+
                 withContext(Dispatchers.Main) {
                     currentAddressTextView.text = "Error: ${e.message}"
                 }
